@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Access Portal | StockPredict AI</title>
+<link rel="stylesheet" href="style.css">
+<script src="https://unpkg.com/@phosphor-icons/web"></script>
+
+</head>
+<body>
+
+<div class="container">
+  <div class="header">
+    <h2 id="pageTitle">Create Account</h2>
+    <p class="subtitle" id="pageSubtitle">Join StockPredict for AI-driven insights</p>
+  </div>
+
+  <div class="toggle-box">
+    <div class="slider" id="slider"></div>
+    <button class="toggle-btn active" onclick="switchTab('register')">Register</button>
+    <button class="toggle-btn" onclick="switchTab('login')">Login</button>
+  </div>
+
+  <div class="forms-wrapper">
+    <!-- Register Form -->
+    <form id="regForm" class="fade-in">
+      <div class="form-group">
+        <input type="text" id="regName" placeholder="Full Name" required />
+      </div>
+      <div class="form-group">
+        <input type="email" id="regEmail" placeholder="Email Address" required />
+      </div>
+      <div class="form-group">
+        <input type="password" id="regPass" placeholder="Password (min 6 chars)" required />
+        <i class="ph ph-eye eye-icon" onclick="togglePass('regPass', this)"></i>
+      </div>
+      
+      <button type="submit" class="btn-primary" id="regBtn">
+        <span class="btn-text">Sign Up Free</span>
+        <div class="spinner"></div>
+      </button>
+    </form>
+
+    <!-- Login Form -->
+    <form id="loginForm" class="fade-in">
+      <div class="form-group">
+        <input type="email" id="loginEmail" placeholder="Email Address" required />
+      </div>
+      <div class="form-group">
+        <input type="password" id="loginPass" placeholder="Password" required />
+        <i class="ph ph-eye eye-icon" onclick="togglePass('loginPass', this)"></i>
+      </div>
+      
+      <div class="forgot-password">
+        <a href="#" class="forgot-link" onclick="showResetForm()">
+          <i class="ph ph-lock-key"></i> Forgot Password?
+        </a>
+      </div>
+
+      <button type="submit" class="btn-primary" id="loginBtn">
+        <span class="btn-text">Access Dashboard</span>
+        <div class="spinner"></div>
+      </button>
+    </form>
+
+    <!-- Reset Password Form -->
+    <form id="resetForm">
+      <p class="subtitle">Enter your email address and we'll send you a link to reset your password.</p>
+      
+      <div class="form-group">
+        <input type="email" id="resetEmail" placeholder="Enter your email address" required />
+      </div>
+      
+      <button type="submit" class="btn-primary" id="resetBtn">
+        <span class="btn-text">Send Reset Link</span>
+        <div class="spinner"></div>
+      </button>
+      
+      <div style="text-align: center; margin-top: 20px;">
+        <a href="#" class="forgot-link" onclick="showLoginForm()">
+          <i class="ph ph-arrow-left"></i> Back to Login
+        </a>
+      </div>
+    </form>
+    
+    <!-- Messages -->
+    <p id="errorBox" class="error-msg"></p>
+    <p id="successBox" class="success-msg"></p>
+    
+    <div id="separator" style="text-align: center; margin: 20px 0; font-size: 0.8rem; color: var(--text-muted); display: none;">OR</div>
+
+    <button class="btn-primary btn-google" id="googleBtn" type="button">
+      <img src="https://www.svgrepo.com/show/475656/google-color.svg" width="20" alt="G" />
+      <span>Continue with Google</span>
+    </button>
+  </div>
+</div>
+
+<script type="module">
+  // Import Firebase Functions from CDN
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+  import { 
+    getAuth, 
+    createUserWithEmailAndPassword, 
+    signInWithEmailAndPassword, 
+    GoogleAuthProvider, 
+    signInWithPopup,
+    updateProfile,
+    onAuthStateChanged,
+    sendPasswordResetEmail // Added for password reset
+  } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+
+  // --- 1. FIREBASE CONFIGURATION ---
+  const firebaseConfig = {
+    apiKey: "AIzaSyDQT4wyLI4BUdybJ6li8IUqJ6rauCvK7lE",
+    authDomain: "stock-market-f180a.firebaseapp.com",
+    projectId: "stock-market-f180a",
+    storageBucket: "stock-market-f180a.firebasestorage.app",
+    messagingSenderId: "655265052804",
+    appId: "1:655265052804:web:ccc30d2c3ba1eda9246ad1",
+    measurementId: "G-BMCS3NYKK7"
+  };
+
+  // Initialize Firebase
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const provider = new GoogleAuthProvider();
+
+  // --- 2. AUTH STATE LISTENER (Redirect if logged in) ---
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      console.log("User detected, redirecting...");
+      // Add a small delay for animation effect if needed, otherwise instant
+      window.location.href = "Dashboard.html"; 
+    }
+  });
+
+  // --- 3. UI HANDLERS ---
+
+  // Error Message Helper
+  const showError = (msg) => {
+    const box = document.getElementById('errorBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    const successBox = document.getElementById('successBox');
+    successBox.style.display = 'none';
+    setTimeout(() => box.style.display = 'none', 4000);
+  }
+
+  // Success Message Helper
+  const showSuccess = (msg) => {
+    const box = document.getElementById('successBox');
+    box.textContent = msg;
+    box.style.display = 'block';
+    const errorBox = document.getElementById('errorBox');
+    errorBox.style.display = 'none';
+    setTimeout(() => box.style.display = 'none', 5000);
+  }
+
+  // Loading State Helper
+  const toggleLoading = (btnId, isLoading) => {
+    const btn = document.getElementById(btnId);
+    const spinner = btn.querySelector('.spinner');
+    const text = btn.querySelector('.btn-text');
+    
+    if(isLoading){
+      btn.disabled = true;
+      spinner.style.display = 'block';
+      text.style.display = 'none';
+      btn.style.opacity = '0.7';
+    } else {
+      btn.disabled = false;
+      spinner.style.display = 'none';
+      text.style.display = 'block';
+      btn.style.opacity = '1';
+    }
+  }
+
+  // --- 4. REGISTRATION LOGIC ---
+  document.getElementById('regForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name = document.getElementById('regName').value;
+    const email = document.getElementById('regEmail').value;
+    const pass = document.getElementById('regPass').value;
+
+    if (pass.length < 6) return showError("Password must be at least 6 characters");
+
+    toggleLoading('regBtn', true);
+
+    try {
+      const userCredential = await createUserWithEmailAndPassword(auth, email, pass);
+      const user = userCredential.user;
+      
+      // Update the user's "Display Name" in Firebase
+      await updateProfile(user, { displayName: name });
+      
+      // Redirect happens automatically via onAuthStateChanged
+    } catch (error) {
+      console.error(error);
+      let msg = error.message;
+      if(msg.includes('email-already-in-use')) msg = "Email is already registered. Please Login.";
+      showError(msg.replace('Firebase: ', ''));
+      toggleLoading('regBtn', false);
+    }
+  });
+
+  // --- 5. LOGIN LOGIC ---
+  document.getElementById('loginForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('loginEmail').value;
+    const pass = document.getElementById('loginPass').value;
+
+    toggleLoading('loginBtn', true);
+
+    try {
+      await signInWithEmailAndPassword(auth, email, pass);
+      // Redirect happens automatically via onAuthStateChanged
+    } catch (error) {
+      console.error(error);
+      let msg = "Invalid Email or Password";
+      if(error.code === 'auth/too-many-requests') msg = "Too many failed attempts. Try later.";
+      showError(msg);
+      toggleLoading('loginBtn', false);
+    }
+  });
+
+  // --- 6. PASSWORD RESET LOGIC ---
+  document.getElementById('resetForm').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const email = document.getElementById('resetEmail').value;
+
+    if (!email) return showError("Please enter your email address");
+
+    toggleLoading('resetBtn', true);
+
+    try {
+      await sendPasswordResetEmail(auth, email);
+      showSuccess("Password reset email sent! Check your inbox.");
+      document.getElementById('resetEmail').value = '';
+      
+      // Show back to login link after success
+      setTimeout(() => {
+        showLoginForm();
+      }, 3000);
+      
+    } catch (error) {
+      console.error(error);
+      let msg = "Error sending reset email";
+      if(error.code === 'auth/user-not-found') msg = "No account found with this email";
+      else if(error.code === 'auth/invalid-email') msg = "Invalid email address";
+      else if(error.code === 'auth/too-many-requests') msg = "Too many attempts. Try again later.";
+      showError(msg);
+    } finally {
+      toggleLoading('resetBtn', false);
+    }
+  });
+
+  // --- 7. GOOGLE SIGN-IN ---
+  document.getElementById('googleBtn').addEventListener('click', async () => {
+    try {
+      await signInWithPopup(auth, provider);
+      // Redirect happens automatically via onAuthStateChanged
+    } catch (error) {
+      showError("Google Sign-In Failed: " + error.message);
+    }
+  });
+
+</script>
+
+<script>
+  // Toggle Tabs
+  function switchTab(tab) {
+    const slider = document.getElementById('slider');
+    const btns = document.querySelectorAll('.toggle-btn');
+    const regForm = document.getElementById('regForm');
+    const loginForm = document.getElementById('loginForm');
+    const resetForm = document.getElementById('resetForm');
+    const title = document.getElementById('pageTitle');
+    const subtitle = document.getElementById('pageSubtitle');
+    const errorBox = document.getElementById('errorBox');
+    const successBox = document.getElementById('successBox');
+    const separator = document.getElementById('separator');
+
+    errorBox.style.display = 'none';
+    successBox.style.display = 'none';
+
+    if (tab === 'login') {
+      slider.style.transform = 'translateX(100%)';
+      btns[0].classList.remove('active');
+      btns[1].classList.add('active');
+      
+      regForm.style.display = 'none';
+      loginForm.style.display = 'block';
+      resetForm.style.display = 'none';
+      separator.style.display = 'block';
+      title.innerText = "Welcome Back";
+      subtitle.innerText = "Login to access real-time predictions";
+    } else {
+      slider.style.transform = 'translateX(0)';
+      btns[0].classList.add('active');
+      btns[1].classList.remove('active');
+
+      regForm.style.display = 'block';
+      loginForm.style.display = 'none';
+      resetForm.style.display = 'none';
+      separator.style.display = 'block';
+      title.innerText = "Create Account";
+      subtitle.innerText = "Join StockPredict for AI-driven insights";
+    }
+  }
+
+  // Show Reset Password Form
+  function showResetForm() {
+    const regForm = document.getElementById('regForm');
+    const loginForm = document.getElementById('loginForm');
+    const resetForm = document.getElementById('resetForm');
+    const title = document.getElementById('pageTitle');
+    const subtitle = document.getElementById('pageSubtitle');
+    const errorBox = document.getElementById('errorBox');
+    const successBox = document.getElementById('successBox');
+    const separator = document.getElementById('separator');
+    const toggleBox = document.querySelector('.toggle-box');
+
+    errorBox.style.display = 'none';
+    successBox.style.display = 'none';
+    
+    // Hide other forms and toggle
+    regForm.style.display = 'none';
+    loginForm.style.display = 'none';
+    resetForm.style.display = 'block';
+    toggleBox.style.display = 'none';
+    separator.style.display = 'none';
+    
+    // Update title
+    title.innerText = "Reset Password";
+    subtitle.innerText = "";
+    
+    // Clear input
+    document.getElementById('resetEmail').value = '';
+  }
+
+  // Show Login Form (from reset form)
+  function showLoginForm() {
+    const loginForm = document.getElementById('loginForm');
+    const resetForm = document.getElementById('resetForm');
+    const title = document.getElementById('pageTitle');
+    const subtitle = document.getElementById('pageSubtitle');
+    const toggleBox = document.querySelector('.toggle-box');
+    const separator = document.getElementById('separator');
+    const errorBox = document.getElementById('errorBox');
+    const successBox = document.getElementById('successBox');
+
+    errorBox.style.display = 'none';
+    successBox.style.display = 'none';
+    
+    resetForm.style.display = 'none';
+    loginForm.style.display = 'block';
+    toggleBox.style.display = 'flex';
+    separator.style.display = 'block';
+    
+    title.innerText = "Welcome Back";
+    subtitle.innerText = "Login to access real-time predictions";
+    
+    // Set active state on login button
+    const btns = document.querySelectorAll('.toggle-btn');
+    btns[0].classList.remove('active');
+    btns[1].classList.add('active');
+    document.getElementById('slider').style.transform = 'translateX(100%)';
+  }
+
+  // Toggle Password Visibility
+  function togglePass(inputId, icon) {
+    const input = document.getElementById(inputId);
+    if (input.type === "password") {
+      input.type = "text";
+      icon.classList.remove("ph-eye");
+      icon.classList.add("ph-eye-slash");
+    } else {
+      input.type = "password";
+      icon.classList.remove("ph-eye-slash");
+      icon.classList.add("ph-eye");
+    }
+  }
+</script>
+
+</body>
+</html>

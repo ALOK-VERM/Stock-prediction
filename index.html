@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="indexcss.css">
+  <link rel="icon" href="logo.stock.png.jpg" type="image/png">
+  <title>Stock Market Prediction - Home</title>
+    <link rel="stylesheet" href="indexcss.css">
+  
+  <!-- Add Firebase SDK -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+</head>
+<body>
+
+  <!-- Navbar -->
+  <nav class="navbar">
+    <div class="logo-title">
+      <img src="logo.stock.png.jpg" alt="Logo" class="logo">
+      <span>Stock Predict</span>
+    </div>
+
+    <ul>
+      <li><a href="login.html" onclick="showAuthModal('register')">Register</a></li>
+      <li><a href="about.html">About</a></li>
+      <li><a href="contact.html">Contact</a></li>
+    </ul>
+    
+    <!-- User info will be shown when logged in -->
+    <div class="user-info" id="userInfo" style="display: none;">
+      <span id="userEmail"></span>
+      <button onclick="logout()">Logout</button>
+    </div>
+  </nav>
+
+  <!-- Hero Section with Video Background -->
+  <section class="hero">
+    <!-- Video Background -->
+    <div class="video-background">
+      <video autoplay muted loop playsinline>
+        <source src="vedio animation.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+      </video>
+    </div>
+    
+    <!-- Hero Content -->
+    <div class="hero-content">
+      <h2>Powered Stock Market Predictions</h2>
+      <p>Make smarter trading decisions with real-time insights, live charts, and AI-driven predictions designed for both beginners and professionals.</p>
+      <a href="login.html" class="btn" id="getStartedBtn" onclick="showAuthModal('register')">Get Started</a>
+    </div>
+  </section>
+
+  <!-- Features -->
+  <section class="features">
+    <h2>Our Features</h2>
+    <div class="feature-cards">
+      <a href="https://www.nseindia.com/" target="_blank" class="card">
+        <h3>📊 Live Market Data</h3>
+        <p>Stay updated with real-time stock prices and market depth.</p>
+      </a>
+
+      <!-- AI Chatbot Open -->
+      <div class="card" onclick="openChat()">
+        <h3>🤖 AI Predictions</h3>
+        <p>Click to chat with AI and get prediction insights.</p>
+      </div>
+
+      <div class="card">
+        <h3>💼 Portfolio Tracking</h3>
+        <p>Manage your holdings, positions, and performance easily.</p>
+      </div>
+
+      <div class="card">
+        <h3>🔒 Secure Trading</h3>
+        <p>Your data is encrypted and transactions are 100% secure.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials -->
+  <section class="testimonials">
+    <h2>What Our Users Say</h2>
+    <div class="testimonial">
+      "This app changed the way I trade! Predictions are highly accurate."
+      <span>- ALOK HARERAM VERMA</span>
+    </div>
+    <div class="testimonial">
+      "Clean UI, easy to use, and reliable insights. Perfect for beginners."
+      <span>- ALOK HARERAM VERMA, Student</span>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <p>&copy; 2025 StockPredict. All rights reserved.</p>
+    <p>✨ Created with ❤ by <strong>Alok Verma</strong></p>
+    <p class="social">
+      GitHub: alokverma262003 | 
+      <a href="#" target="_blank">LinkedIn</a>
+    </p>
+  </footer>
+
+  <!-- Auth Modal -->
+  <div class="auth-modal" id="authModal">
+    <div class="auth-content">
+      <button class="close-btn" onclick="closeAuthModal()">×</button>
+      <div class="auth-tabs">
+        <button class="auth-tab active" onclick="switchAuthTab('login')">Login</button>
+        <button class="auth-tab" onclick="switchAuthTab('register')">Register</button>
+      </div>
+      
+      <!-- Login Form -->
+      <div class="auth-form" id="loginForm">
+        <input type="email" id="loginEmail" placeholder="Email">
+        <input type="password" id="loginPassword" placeholder="Password">
+        <div id="loginError" style="color: red; font-size: 0.9rem;"></div>
+        <button onclick="login()">Login</button>
+      </div>
+      
+      <!-- Register Form -->
+      <div class="auth-form" id="registerForm" style="display: none;">
+        <input type="text" id="registerName" placeholder="Full Name">
+        <input type="email" id="registerEmail" placeholder="Email">
+        <input type="password" id="registerPassword" placeholder="Password">
+        <div id="registerError" style="color: red; font-size: 0.9rem;"></div>
+        <button onclick="register()">Register</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Chatbot Popup -->
+  <div class="chatbot-box" id="chatbot">
+    <div class="chat-header">AI Stock Prediction Bot</div>
+    <div class="chat-body" id="chatBody">
+      👋 Hi! I'm your AI trading assistant. Ask anything about the market!
+    </div>
+    <div class="chat-input">
+      <input type="text" id="msgInput" placeholder="Type your message...">
+      <button onclick="sendMessage()">Send</button>
+    </div>
+  </div>
+
+  <script src="indexscript.js"></script>
+</body>
+</html>
